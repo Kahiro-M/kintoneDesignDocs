@@ -178,6 +178,8 @@ cython_debug/
 kintone_fields.csv
 kintone_lookup.csv
 kintone_reference_table.csv
+202*/*.json
+202*/*.csv
 
 # 入力ファイル
 *.json
