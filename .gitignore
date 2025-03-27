@@ -181,3 +181,5 @@ kintone_reference_table.csv
 
 # 入力ファイル
 *.json
+appList.csv
+config.ini
