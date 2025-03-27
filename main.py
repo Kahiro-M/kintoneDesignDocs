@@ -1,0 +1,3 @@
+import kintone
+
+kintone.createDocs()

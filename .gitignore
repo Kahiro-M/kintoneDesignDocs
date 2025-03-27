@@ -172,3 +172,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# 出力ファイル
+kintone_fields.csv
+kintone_lookup.csv
+# 入力ファイル
+*.json
