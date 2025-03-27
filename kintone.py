@@ -1,6 +1,49 @@
+# 指定されたCSVファイルを読み込み、連想配列（辞書のリスト）として返す
+def loadCsv(file_path, encoding='utf-8-sig'):
+    import csv
+
+    """
+    指定されたCSVファイルを読み込み、連想配列（辞書のリスト）として返す
+
+    :param file_path: CSVファイルのパス
+    :param encoding: ファイルのエンコーディング（デフォルト: 'utf-8-sig'）
+    :return: 辞書のリスト
+    """
+    records = []
+    with open(file_path, newline='', encoding=encoding) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            records.append(dict(row))
+    return records
+
+# loadCsvで生成された連想配列から連結されたAPI-Tokenを返す
+def getAllApiToken(dictList):
+    """
+    loadCsvで生成された連想配列から連結されたAPI-Tokenを返す
+
+    :param dict: 連想配列
+    :return: 連結されたAPI-Token
+    """
+    api_tokens = []
+    for dict in dictList:
+        if(dict.get('api')):
+            api_tokens.append(dict.get('api'))
+    return ",".join(api_tokens)
+
+
 def createDocs(json_path="out.json",csv_main_path="kintone_fields.csv",csv_lookup_path="kintone_lookup.csv", csv_reference_path="kintone_reference_table.csv"):
     import json
     import csv
+
+    """
+    指定されたkintoneのフィールド情報jsonファイルを読み込み、解析結果をcsvに保存
+
+    :param json_path: jsonファイルのパス
+    :param csv_main_path        : フィールド情報の出力csvファイルパス
+    :param csv_lookup_path      : ルックアップフィールド情報の出力csvファイルパス
+    :param csv_reference_path   : 関連レコード一覧情報の出力csvファイルパス
+    :return: void
+    """
 
     # JSON読み込み
     with open(json_path, "r", encoding="utf-8") as f:
