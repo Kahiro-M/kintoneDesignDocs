@@ -82,35 +82,43 @@ def createDocs(json_path="out.json",csv_main_path="kintone_fields.csv",csv_looku
             notes.append("選択肢あり")
 
         # ルックアップ情報
-        if "lookup" in info and info["lookup"] is not None:
-            lookup = info["lookup"]
-            app_id = lookup["relatedApp"].get("app", "")
-            related_key = lookup.get("relatedKeyField", "")
-            sort = lookup.get("sort", "")
-            mappings = "; ".join([
-                f"{m['field']} ← {m['relatedField']}"
-                for m in lookup.get("fieldMappings", [])
-            ])
-            lookup_fields.append([
-                code, label, app_id, related_key, sort, mappings, field_type
-            ])
-            notes.append(f"ルックアップ（app:{app_id}、key:{related_key}）")
+
+        if "lookup" in info:
+            lookup = info.get("lookup")
+            if lookup is None:
+                notes.append("-- ルックアップ情報の取得に失敗")
+            else:
+                app_id = lookup["relatedApp"].get("app", "")
+                related_key = lookup.get("relatedKeyField", "")
+                sort = lookup.get("sort", "")
+                mappings = "; ".join([
+                    f"{m['field']} ← {m['relatedField']}"
+                    for m in lookup.get("fieldMappings", [])
+                ])
+                lookup_fields.append([
+                    code, label, app_id, related_key, sort, mappings, field_type
+                ])
+                notes.append(f"ルックアップ（app:{app_id}、key:{related_key}）")
 
         # 関連レコード一覧フィールド情報
-        if field_type == "REFERENCE_TABLE" and info.get("referenceTable"):
-            ref = info["referenceTable"]
-            app_id = ref["relatedApp"].get("app", "")
-            condition = ""
-            if "condition" in ref and isinstance(ref["condition"], dict):
-                condition = f"{ref['condition'].get('field', '')} = {ref['condition'].get('relatedField', '')}"
-            display_fields = "; ".join(ref.get("displayFields", []))
-            sort = ref.get("sort", "")
-            size = ref.get("size", "")
 
-            reference_tables.append([
-                code, label, app_id, condition, display_fields, sort, size
-            ])
-            notes.append(f"関連レコード一覧（app:{app_id}、条件:{condition}）")
+        if field_type == "REFERENCE_TABLE":
+            ref = info.get("referenceTable")
+            if ref is None:
+                notes.append("-- 関連レコード一覧情報の取得に失敗")
+            else:
+                app_id = ref["relatedApp"].get("app", "")
+                condition = ""
+                if "condition" in ref and isinstance(ref["condition"], dict):
+                    condition = f"{ref['condition'].get('field', '')} = {ref['condition'].get('relatedField', '')}"
+                display_fields = "; ".join(ref.get("displayFields", []))
+                sort = ref.get("sort", "")
+                size = ref.get("size", "")
+
+                reference_tables.append([
+                    code, label, app_id, condition, display_fields, sort, size
+                ])
+                notes.append(f"関連レコード一覧（app:{app_id}、条件:{condition}）")
 
         # メインフィールド情報に追加
         main_fields.append([
