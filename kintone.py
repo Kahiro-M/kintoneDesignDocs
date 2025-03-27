@@ -1,4 +1,4 @@
-def createDocs(json_path="out.json",csv_main_path="kintone_fields.csv",csv_lookup_path="kintone_lookup.csv"):
+def createDocs(json_path="out.json",csv_main_path="kintone_fields.csv",csv_lookup_path="kintone_lookup.csv", csv_reference_path="kintone_reference_table.csv"):
     import json
     import csv
 
@@ -11,6 +11,7 @@ def createDocs(json_path="out.json",csv_main_path="kintone_fields.csv",csv_looku
     # 出力用データ格納リスト
     main_fields = []
     lookup_fields = []
+    reference_tables = []
 
     for code, info in fields.items():
         field_type = info.get("type", "")
@@ -52,6 +53,22 @@ def createDocs(json_path="out.json",csv_main_path="kintone_fields.csv",csv_looku
             ])
             notes.append(f"ルックアップ（app:{app_id}、key:{related_key}）")
 
+        # 関連レコード一覧フィールド情報
+        if field_type == "REFERENCE_TABLE" and info.get("referenceTable"):
+            ref = info["referenceTable"]
+            app_id = ref["relatedApp"].get("app", "")
+            condition = ""
+            if "condition" in ref and isinstance(ref["condition"], dict):
+                condition = f"{ref['condition'].get('field', '')} = {ref['condition'].get('relatedField', '')}"
+            display_fields = "; ".join(ref.get("displayFields", []))
+            sort = ref.get("sort", "")
+            size = ref.get("size", "")
+
+            reference_tables.append([
+                code, label, app_id, condition, display_fields, sort, size
+            ])
+            notes.append(f"関連レコード一覧（app:{app_id}、条件:{condition}）")
+
         # メインフィールド情報に追加
         main_fields.append([
             code,
@@ -76,5 +93,12 @@ def createDocs(json_path="out.json",csv_main_path="kintone_fields.csv",csv_looku
             writer = csv.writer(f)
             writer.writerow(["フィールドコード", "ラベル", "関連アプリID", "関連キー", "ソート条件", "フィールドマッピング", "フィールドタイプ"])
             writer.writerows(lookup_fields)
+
+    # CSV出力（関連レコード一覧フィールド）
+    if reference_tables:
+        with open(csv_reference_path, "w", newline="", encoding="utf-8-sig") as f:
+            writer = csv.writer(f)
+            writer.writerow(["フィールドコード", "ラベル", "関連アプリID", "条件", "表示フィールド", "ソート条件", "表示件数"])
+            writer.writerows(reference_tables)
 
     print("CSV出力が完了しました。")
