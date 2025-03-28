@@ -7,14 +7,13 @@ import mkdt
 config = loadIni.readConfig('config.ini')
 
 # appList.csvからアプリIDとAPIの情報を取得
-appList = kintone.loadCsv('appList.csv')
-apiToken = kintone.getAllApiToken(appList)
+appDict = kintone.loadCsv('appList.csv')
 
 # 保存先フォルダを作成
 dirPath = mkdt.mkdirDatetime()+'\\'
 
 # appList.csvに記載されているアプリ情報から設計情報を取得する
-for appDict in appList:
+for appId in list(appDict):
     exeFlg = True
 
     json_path = dirPath
@@ -23,28 +22,27 @@ for appDict in appList:
     csv_reference_path =dirPath
 
     # アプリIDを取得
-    if(appDict.get('id')):
-        json_path += appDict.get('id')+'_'
-        csv_main_path += appDict.get('id')+'_'
-        csv_lookup_path += appDict.get('id')+'_'
-        csv_reference_path += appDict.get('id')+'_'
-    else:
-        exeFlg = False
+    json_path += appId+'_'
+    csv_main_path += appId+'_'
+    csv_lookup_path += appId+'_'
+    csv_reference_path += appId+'_'
 
     # アプリ名を取得
-    if(appDict.get('name')):
-        json_path += appDict.get('name')+'_appDesignInfo.json'
-        csv_main_path += appDict.get('name')+'_kintone_fields.csv'
-        csv_lookup_path += appDict.get('name')+'_kintone_lookup.csv'
-        csv_reference_path += appDict.get('name')+'_kintone_reference_table.csv'
+    if(appDict[appId].get('name')):
+        json_path += appDict[appId].get('name')+'_appDesignInfo.json'
+        csv_main_path += appDict[appId].get('name')+'_kintone_fields.csv'
+        csv_lookup_path += appDict[appId].get('name')+'_kintone_lookup.csv'
+        csv_reference_path += appDict[appId].get('name')+'_kintone_reference_table.csv'
     else:
         exeFlg = False
 
     # APIがあるか確認
-    if(appDict.get('api')==None):
+    if(appDict[appId].get('api')):
+        apiToken = kintone.getRelationApiToken(appId,appDict)
+    else:
         exeFlg = False
 
     # フィールド情報のJSONを取得＆JSONから設計CSVを出力
     if(exeFlg):
-        curl.getFieldsInfo(config['subdomain'],appDict.get('id'),apiToken,json_path)
+        curl.getFieldsInfo(config['subdomain'],appId,apiToken,json_path)
         kintone.createDocs(json_path,csv_main_path,csv_lookup_path,csv_reference_path)

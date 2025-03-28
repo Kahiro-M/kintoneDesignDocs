@@ -14,21 +14,65 @@ def loadCsv(file_path, encoding='utf-8-sig'):
         reader = csv.DictReader(f)
         for row in reader:
             records.append(dict(row))
-    return records
+    return transDict(records)
 
-# loadCsvで生成された連想配列から連結されたAPI-Tokenを返す
-def getAllApiToken(dictList):
+# アプリAPIデータを作成する
+def transDict(records):
     """
-    loadCsvで生成された連想配列から連結されたAPI-Tokenを返す
+    配列の各要素に辞書型を辞書型に辞書型へ変換する
+    :param records: 配列の各要素に辞書型
+        [
+            {
+                'id': 'app-id',
+                'api': 'random-api-token',
+                'name': 'app-name',
+                'relation-id': 'app-id,app-id'
+            },
+            {
+                'id': 'app-id',
+                'api': 'random-api-token',
+                'name': 'app-name',
+                'relation-id': 'app-id,app-id'
+            }
+        ]
+    :return:
+        {
+            'app-id': {
+                'api': 'random-api-token',
+                'name': 'app-name',
+                'relation-id': 'app-id,app-id'
+            },
+            'app-id': {
+                'api': 'random-api-token',
+                'name': 'app-name',
+                'relation-id': 'app-id,app-id'
+            }
+        }
+    """
+    result = {}
+    for item in records:
+        key = item['id']
+        value = item.copy()
+        del value['id']
+        result[key] = value
+    return result
+
+# アプリAPIデータから連携先のAPI-Tokenを返す
+def getRelationApiToken(appId,appDict):
+    """
+    アプリAPIデータから連携先のAPI-Tokenを連結して返す
 
     :param dict: 連想配列
     :return: 連結されたAPI-Token
     """
-    api_tokens = []
-    for dict in dictList:
-        if(dict.get('api')):
-            api_tokens.append(dict.get('api'))
-    return ",".join(api_tokens)
+    apiTokens = [appDict[appId].get('api')]
+
+    if(appDict[appId].get('relation-id') != ''):
+        relationList = appDict[appId].get('relation-id').split(',')
+
+        for rAppId in relationList:
+            apiTokens.append(appDict[rAppId].get('api'))
+    return ",".join(apiTokens)
 
 
 def createDocs(json_path="out.json",csv_main_path="kintone_fields.csv",csv_lookup_path="kintone_lookup.csv", csv_reference_path="kintone_reference_table.csv"):

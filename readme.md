@@ -14,13 +14,21 @@ kintoneのアプリごとにフィールド情報を取得し、csv形式で出�
         subdomain=sub_domain
         ```
     - appList.csv  
-        取得したいアプリごとにアプリID、APIトークン、アプリ名を指定する
+        取得したいアプリごとにアプリID、APIトークン、アプリ名、ルックアップor関連レコード一覧で参照しているアプリIDを指定する
         ```
-        id,api,name
-        1,"SampleApp001ApiTokenSampleApp001ApiToken","サンプルアプリ1"
-        2,"SampleApp002ApiTokenSampleApp002ApiToken","サンプルアプリ2"
-        3,"SampleApp003ApiTokenSampleApp003ApiToken","サンプルアプリ3"
+        id,api,name,relation-id
+        1,"SampleApp001ApiTokenSampleApp001ApiToken","サンプルアプリ1","2,3"
+        2,"SampleApp002ApiTokenSampleApp002ApiToken","サンプルアプリ2","3"
+        3,"SampleApp003ApiTokenSampleApp003ApiToken","サンプルアプリ3",
         ```
+        relation-idで適切なアプリIDが含まれていない場合、参照先の情報を取得できません。  
+        例）
+
+        |フィールドコード|ラベル|必須|重複禁止|デフォルト値|選択肢|備考|
+        |:--|:--|:--:|:--:|:--:|:--:|:--:|
+        |サンプルアプリ2 |サンプルアプリ2 |いいえ |いいえ|なし|なし|-- 関連レコード一覧情報の取得に失敗|
+
+
 ### 実行
 ```
 $ python main.py 
